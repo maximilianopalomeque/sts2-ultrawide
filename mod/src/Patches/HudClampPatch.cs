@@ -4,6 +4,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
+using System;
 
 namespace Sts2Ultrawide.Patches;
 
@@ -103,6 +104,36 @@ internal static class HudClampPatches
     /// it needs the same treatment: at full width the back arrow and the legend end up at
     /// opposite ends of the display with the map itself marooned in the middle.
     /// </summary>
+    /// <summary>
+    /// The back arrow places itself at x = 0 of the canvas rather than of its parent:
+    ///     _showPos = new Vector2(0f, GetWindow().ContentScaleSize.Y) - _posOffset
+    /// so it sits against the very edge of a wide display no matter what its container
+    /// is doing. Nudge it in by the same inset - unless its parent is already inset, in
+    /// which case the two would stack and push it too far.
+    /// </summary>
+    [HarmonyPatch(typeof(NBackButton), "OnWindowChange")]
+    [HarmonyPostfix]
+    private static void NBackButton_OnWindowChange(NBackButton __instance)
+    {
+        float inset = InsetFor(__instance);
+        if (inset <= 0f)
+            return;
+
+        float parentX = (__instance.GetParent() as Control)?.GlobalPosition.X ?? 0f;
+        float shift = inset - parentX;
+        if (Math.Abs(shift) < 0.5f)
+            return;
+
+        foreach (string field in new[] { "_showPos", "_hidePos" })
+        {
+            var info = AccessTools.Field(typeof(NBackButton), field);
+            if (info?.GetValue(__instance) is Vector2 v)
+                info.SetValue(__instance, new Vector2(v.X + shift, v.Y));
+        }
+
+        __instance.Position = new Vector2(__instance.Position.X + shift, __instance.Position.Y);
+    }
+
     [HarmonyPatch(typeof(NMapScreen), "_Ready")]
     [HarmonyPostfix]
     private static void NMapScreen_Ready(NMapScreen __instance)

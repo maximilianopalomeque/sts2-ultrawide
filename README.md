@@ -51,7 +51,7 @@ See [`mod/ultrawide.example.json`](mod/ultrawide.example.json).
 | --- | --- | --- |
 | `background_vertical_anchor` | `1.0` | Where room backgrounds are anchored vertically when they grow. Widening always costs vertical view; `1.0` takes it all out of the sky and keeps the ground. `0.5` centres, `0.0` keeps the sky. |
 | `ancient_vertical_anchor` | `0.5` | Same for event and Ancient illustrations. These are single paintings with the subject in the middle, so they are centred rather than anchored low. |
-| `background_scale_multiplier` | `1.06` | Overscan. A few per cent of bleed so no room ends up a sliver short at one edge. |
+| `background_scale_multiplier` | `1.10` | Overscan. A few per cent of bleed so no room ends up a sliver short at one edge. |
 | `hud_max_ratio` | `2.3888888` | Widest aspect the HUD may spread across. `2.3888888` is 21:9. Set to `0` to let the HUD use the whole display. |
 
 ## Building

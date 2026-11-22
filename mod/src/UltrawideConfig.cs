@@ -39,7 +39,7 @@ internal static class UltrawideConfig
     /// shortfall along with it and leaves a sliver of bare canvas at one edge. A few per
     /// cent of bleed costs almost nothing in crop and guarantees the edges are covered.
     /// </summary>
-    public static float BackgroundScaleMultiplier = 1.06f;
+    public static float BackgroundScaleMultiplier = 1.10f;
 
     /// <summary>
     /// Widest aspect the HUD may spread across, as width/height, or 0 to let the HUD

@@ -1,0 +1,21 @@
+"workshopitem"
+{
+    "appid"           "2868840"
+
+    // Dejar en 0 la primera vez: Steam crea el item y devuelve el id.
+    // Despues de la primera subida, pegar aca el id que devolvio.
+    "publishedfileid" "0"
+
+    "contentfolder"   "C:\web\sts2-ultrawide\release\content"
+    "previewfile"     "C:\web\sts2-ultrawide\workshop\preview.png"
+
+    // 0 = publico, 1 = solo amigos, 2 = privado.
+    // Conviene subir en privado, revisarlo en Steam y recien ahi pasarlo a publico.
+    "visibility"      "2"
+
+    "title"           "Ultrawide Support (32:9 / 48:9)"
+
+    "description"     "Slay the Spire 2 caps its canvas at 21:9 and pillarboxes anything wider, so a 32:9 monitor plays the game on half its screen. This mod lifts that cap.\n\n[b]What it does[/b]\n[list]\n[*]Builds the canvas at your display's real aspect ratio - no black bars at 32:9, 48:9 or anything between.\n[*]Scales backgrounds in combat, shops, rest sites, events, Ancient scenes and the main menu to cover the wider screen.\n[*]Keeps the HUD within a comfortable 21:9 band in the middle instead of scattering it to the far corners. Configurable, including off.\n[*]Keeps using your normal save instead of the separate modded profile the game would otherwise switch to.\n[/list]\n\n[b]Other players do not need this mod.[/b] It is purely visual and declares affects_gameplay=false, so multiplayer works with unmodded friends.\n\n[b]Setup[/b]\nSet Settings - Graphics - Aspect Ratio to [b]Auto[/b]. Any explicit ratio keeps vanilla behaviour.\n\n[b]Configuration[/b]\nOptional. Create ultrawide.json in %APPDATA%\SlayTheSpire2\ to tune the background anchoring, overscan and HUD width. See the GitHub page.\n\n[b]Source[/b]\nhttps://github.com/maxipalomeque/sts2-ultrawide"
+
+    "changenote"      "Initial release."
+}

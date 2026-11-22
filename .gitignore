@@ -25,3 +25,6 @@ tools/dllstrings.py
 tools/survey.py
 tools/tiers.py
 tools/lowres.py
+
+# staged workshop payload (build output)
+release/
