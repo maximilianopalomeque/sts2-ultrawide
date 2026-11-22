@@ -1,7 +1,7 @@
 {
   "id": "ultrawide",
   "name": "Ultrawide Support",
-  "author": "maxipalomeque",
+  "author": "maximilianopalomeque",
   "description": "Native support for displays wider than 21:9 (32:9, 48:9 and anything in between). Purely visual: declares affects_gameplay=false, so other players do not need this mod to play with you.",
   "version": "0.1.0",
   "has_dll": true,

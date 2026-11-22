@@ -102,7 +102,7 @@ itself off while the rest keeps working. Check the log at
 
 ## Credits
 
-Built by maxipalomeque. Slay the Spire 2 is by Mega Crit. This mod ships no game assets.
+Built by maximilianopalomeque. Slay the Spire 2 is by Mega Crit. This mod ships no game assets.
 
 ## License
 
