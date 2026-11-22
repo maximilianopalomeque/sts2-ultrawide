@@ -1,0 +1,15 @@
+{
+  "_comment": "Ajustes del mod Ultrawide. Editar y relanzar el juego para aplicar.",
+
+  "_background_vertical_anchor": "fondos de sala (combate/tienda/descanso/menu). 0=arriba 0.5=centro 1=abajo",
+  "background_vertical_anchor": 1.0,
+
+  "_ancient_vertical_anchor": "ilustraciones de evento y Ancients. 0.5 = centro (conserva al personaje)",
+  "ancient_vertical_anchor": 0.5,
+
+  "_background_scale_multiplier": "margen de seguridad del fondo (overscan). 1.0 = justo; 1.06 = 6% de sangria",
+  "background_scale_multiplier": 1.06,
+
+  "_hud_max_ratio": "ancho maximo del HUD. 0 = usa toda la pantalla. 2.3888888 = contenido a 21:9 centrado",
+  "hud_max_ratio": 2.3888888
+}

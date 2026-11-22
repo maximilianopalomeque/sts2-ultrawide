@@ -1,0 +1,27 @@
+# build output
+bin/
+obj/
+__pycache__/
+
+# local captures and extracted game data (not redistributable)
+shots/
+extracted/
+decomp/
+save-backup/
+tools/sts2.strings.txt
+
+# local test automation and machine-specific helpers
+tools/act.ps1
+tools/click.ps1
+tools/focus.ps1
+tools/grab.ps1
+tools/key.ps1
+tools/shot.ps1
+tools/setaspect.py
+tools/bars.py
+tools/edges.py
+tools/parse_cfgb.py
+tools/dllstrings.py
+tools/survey.py
+tools/tiers.py
+tools/lowres.py
