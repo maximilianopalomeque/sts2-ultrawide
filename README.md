@@ -62,7 +62,7 @@ See [`mod/ultrawide.example.json`](mod/ultrawide.example.json).
 | `ancient_vertical_anchor` | `0.5` | Same for event and Ancient illustrations. These are single paintings with the subject in the middle, so they are centred rather than anchored low. |
 | `background_scale_multiplier` | `1.10` | Overscan. A few per cent of bleed so no room ends up a sliver short at one edge. |
 | `hud_max_ratio` | `2.3888888` | Widest aspect the HUD may spread across. `2.3888888` is 21:9. Set to `0` to let the HUD use the whole display. |
-| `layer_coverage` | `true` | Grows each background layer individually so none stops short of the edge. A few bosses keep decorative body parts in those layers, and growing the layer carries them further out; set to `false` to leave that art where vanilla puts it. |
+| `layer_coverage` | `true` | Grows each background layer individually so none stops short of the edge. Set to `false` to scale only the shared container, at the cost of a sliver of uncovered canvas on a few fights. |
 | `character_art_zoom` | `0` | Character select is framed at 21:9 rather than stretched; see Known limitations. `1.0` fills the screen instead, at the cost of a third of the character. |
 | `sharpness` | `0.6` | Strength of the sharpening pass over the room. Enlarging the background means Godot resamples it bilinearly, which is what makes it look soft; a contrast adaptive pass puts much of that back. `0` turns it off. |
 
@@ -152,9 +152,9 @@ Re-checked at 16:9 and 21:9, where the mod is inert.
   The multiplayer lobby shows the same artwork and keeps the game's own layout: it builds
   its scene inside a SubViewport, where the mask lands across the middle of the picture
   instead of at its edges.
-- **A few bosses** keep decorative body parts in the background layers, so
-  `layer_coverage` carries them further out than vanilla puts them. Set it to `false` to
-  leave that art alone, at the cost of a sliver of uncovered canvas on those fights.
+- **The multiplayer lobby and Dread are untested.** Both need a second player to reach.
+  The lobby's panels and artwork are handled, but nobody has looked at them in a real
+  session.
 
 ## Credits
 
