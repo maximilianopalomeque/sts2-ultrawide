@@ -120,17 +120,35 @@ internal static class Ultrawide
     /// </summary>
     public static void GrowToCoverCanvas(Control? node, float factor)
     {
-        if (node == null || factor <= 1.0001f)
+        if (node == null)
             return;
+
+        // Measured from the scale the scene gave it, never from the scale this method
+        // left last time. The handlers that call it fire again on every window and
+        // aspect-ratio change, and multiplying each time compounds: two changes and the
+        // background is at twice the size it should be.
+        if (!node.HasMeta(BaseScaleMeta))
+            node.SetMeta(BaseScaleMeta, node.Scale);
+        Vector2 baseScale = node.GetMeta(BaseScaleMeta).AsVector2();
+
+        if (factor <= 1.0001f)
+        {
+            node.Scale = baseScale;
+            return;
+        }
 
         // The viewport rect is the canvas, and is reliable even during _Ready, when a
         // parent Control may not have been laid out yet and still reports zero size.
         Vector2 canvas = node.GetViewportRect().Size;
+        node.Scale = baseScale;
         var anchor = new Vector2(canvas.X * 0.5f, canvas.Y * UltrawideConfig.BackgroundVerticalAnchor);
         node.PivotOffset = anchor - node.GlobalPosition;
 
-        node.Scale *= factor * UltrawideConfig.BackgroundScaleMultiplier;
+        node.Scale = baseScale * factor * UltrawideConfig.BackgroundScaleMultiplier;
     }
+
+    /// <summary>Metadata key holding a node's scale as its scene authored it.</summary>
+    public const string BaseScaleMeta = "uw_base_scale";
 
     /// <summary>
     /// Scales one node up until it spans the canvas, and no further.

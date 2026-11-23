@@ -39,20 +39,38 @@ internal static class BackgroundPatches
 
     // ---- main menu -------------------------------------------------------------
 
+    /// <summary>Where the logo sits as a fraction of the canvas, before anything moved it.</summary>
+    private const string LogoPlaceMeta = "uw_logo_place";
+
     /// <summary>
     /// The menu's logo is parented under the background container, so scaling the
-    /// background would drag the title up off the top of the screen with it. Pin the
-    /// logo's global transform across the change so only the artwork behind it moves.
+    /// background would drag the title with it.
+    ///
+    /// Putting it back where it was a moment ago is not enough. This runs again on every
+    /// aspect-ratio change, and on those the logo is *supposed* to move, because the
+    /// canvas it is composed against has changed shape -- restoring the old place walks
+    /// it a little further down the screen each time until it is sitting on the menu.
+    /// So the place is recorded once, as a fraction of the canvas, and re-derived for
+    /// whatever canvas is current.
     /// </summary>
     private static void GrowMenuBg(NMainMenuBg instance)
     {
         var logo = AccessTools.Field(typeof(NMainMenuBg), "_logo")?.GetValue(instance) as Node2D;
-        Transform2D? pinned = logo?.GlobalTransform;
+
+        Vector2 canvas = instance.GetViewportRect().Size;
+        if (logo != null && canvas.X > 0f && canvas.Y > 0f && !logo.HasMeta(LogoPlaceMeta))
+            logo.SetMeta(LogoPlaceMeta, logo.GlobalPosition / canvas);
+
+        Vector2? scale = logo?.Scale;
 
         GrowField(instance, "_bg");
 
-        if (logo != null && pinned.HasValue)
-            logo.GlobalTransform = pinned.Value;
+        if (logo == null || !logo.HasMeta(LogoPlaceMeta) || canvas.X <= 0f || canvas.Y <= 0f)
+            return;
+
+        logo.GlobalPosition = logo.GetMeta(LogoPlaceMeta).AsVector2() * canvas;
+        if (scale.HasValue)
+            logo.Scale = scale.Value;
     }
 
     [HarmonyPatch(typeof(NMainMenuBg), "ScaleBgIfNarrow")]
