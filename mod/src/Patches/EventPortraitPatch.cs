@@ -68,16 +68,30 @@ internal static class EventPortraitPatch
         portrait.Scale = Vector2.One;
         portrait.PivotOffset = Vector2.Zero;
 
-        // Anchor to the whole parent rather than nudging offsets, so the portrait keeps
-        // filling the screen if the window is resized later.
         portrait.AnchorLeft = 0f;
         portrait.AnchorTop = 0f;
         portrait.AnchorRight = 1f;
         portrait.AnchorBottom = 1f;
-        portrait.OffsetLeft = 0f;
-        portrait.OffsetTop = 0f;
-        portrait.OffsetRight = 0f;
-        portrait.OffsetBottom = 0f;
+
+        // Solved against the canvas rather than the parent. The event layout is anchored
+        // 39 pixels above the bottom of the screen, so a portrait that merely fills its
+        // parent leaves a black strip along the bottom edge on every event.
+        if (portrait.GetParent() is Control parent)
+        {
+            Vector2 origin = parent.GlobalPosition;
+            Vector2 size = parent.Size;
+            portrait.OffsetLeft = -origin.X;
+            portrait.OffsetTop = -origin.Y;
+            portrait.OffsetRight = canvas.X - origin.X - size.X;
+            portrait.OffsetBottom = canvas.Y - origin.Y - size.Y;
+        }
+        else
+        {
+            portrait.OffsetLeft = 0f;
+            portrait.OffsetTop = 0f;
+            portrait.OffsetRight = 0f;
+            portrait.OffsetBottom = 0f;
+        }
 
         EventVfxPatch.RemapChildren(portrait);
     }

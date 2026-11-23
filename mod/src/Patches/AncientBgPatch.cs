@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Nodes.Screens;
@@ -21,6 +22,57 @@ internal static class AncientBgPatch
 {
     /// <summary>The ratio NAncientBgContainer clamps to - its widest tuned setup.</summary>
     private const float VanillaRatioMax = 2.3333f;
+
+    /// <summary>
+    /// Ancients whose subject sits high in the frame. The anchor is the line the scale
+    /// pivots on, so putting it above the top of the screen pushes the artwork down:
+    /// Vakuu and Nonupeipe are framed so tightly that anchoring at the very top still
+    /// leaves their faces above the edge, and they need the picture moved rather than a
+    /// kinder crop. The rest are composed around the middle and keep the configured
+    /// anchor.
+    ///
+    /// Matched on the artwork's own path. An Ancient's background is a texture, not a
+    /// scene, so there is no node named after it to look for -- which is what made the
+    /// first attempt at this silently do nothing.
+    /// </summary>
+    private static readonly (string Key, float Anchor)[] _topHeavy =
+    {
+        ("vakuu", -0.45f),
+        ("nonupeipe", -0.45f),
+    };
+
+    private static float AnchorFor(Node container)
+    {
+        string? path = FindTexturePath(container, 0);
+        if (path != null)
+        {
+            foreach ((string key, float anchor) in _topHeavy)
+            {
+                if (path.Contains(key, StringComparison.OrdinalIgnoreCase))
+                    return anchor;
+            }
+        }
+        return UltrawideConfig.AncientVerticalAnchor;
+    }
+
+    private static string? FindTexturePath(Node node, int depth)
+    {
+        if (depth > 4)
+            return null;
+
+        foreach (Node child in node.GetChildren())
+        {
+            if (child is TextureRect { Texture: not null } rect && rect.Texture.ResourcePath.Length > 0)
+                return rect.Texture.ResourcePath;
+            if (child is Sprite2D { Texture: not null } sprite && sprite.Texture.ResourcePath.Length > 0)
+                return sprite.Texture.ResourcePath;
+
+            string? found = FindTexturePath(child, depth + 1);
+            if (found != null)
+                return found;
+        }
+        return null;
+    }
 
     [HarmonyPrefix]
     private static bool Prefix(NAncientBgContainer __instance)
@@ -50,7 +102,7 @@ internal static class AncientBgPatch
 
         // Vertically: pivot on the chosen anchor line so that line does not move, which
         // keeps the ground and horizon in place and takes the crop out of the sky.
-        float anchorY = size.Y * UltrawideConfig.AncientVerticalAnchor;
+        float anchorY = size.Y * AnchorFor(__instance);
         float pivotY = anchorY - pos219.Value.Y;
 
         __instance.PivotOffset = new Vector2(pivotX, pivotY);

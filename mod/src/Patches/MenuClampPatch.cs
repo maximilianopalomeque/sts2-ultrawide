@@ -68,11 +68,17 @@ internal static class MenuClampPatch
         HudClampPatches.Narrow(screen, inset);
     }
 
-    private static bool HasArtwork(Node screen)
+    /// <summary>
+    /// Searched rather than looked up directly: some screens hold the container as a
+    /// direct child and others bury it and reach it by unique name, and a lookup that
+    /// only checks the children silently misses the second kind -- which is how the
+    /// multiplayer lobby got narrowed.
+    /// </summary>
+    private static bool HasArtwork(Node node)
     {
-        foreach (Node child in screen.GetChildren())
+        foreach (Node child in node.GetChildren())
         {
-            if (child.Name == ArtworkContainer)
+            if (child.Name == ArtworkContainer || HasArtwork(child))
                 return true;
         }
         return false;
