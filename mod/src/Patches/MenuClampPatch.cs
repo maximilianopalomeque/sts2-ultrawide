@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
@@ -26,13 +25,13 @@ namespace Sts2Ultrawide.Patches;
 [HarmonyPatch(typeof(NSubmenuStack), "Push")]
 internal static class MenuClampPatch
 {
-    private static readonly HashSet<string> _fullBleed = new()
-    {
-        "NCharacterSelectScreen",
-        "NBlitzScreen",
-        "NDreadScreen",
-        "NTimelineScreen",
-    };
+    /// <summary>
+    /// The container every screen built around a full-bleed character illustration
+    /// holds. Recognising the screens by it rather than by name covers the ones that
+    /// only appear in flows this cannot reach -- the multiplayer lobby, Dread -- and any
+    /// the game adds later.
+    /// </summary>
+    private const string ArtworkContainer = "AnimatedBg";
 
     /// <summary>
     /// A prefix, so the screen is already the right width before it is shown. Pushing a
@@ -43,7 +42,7 @@ internal static class MenuClampPatch
     [HarmonyPrefix]
     private static void Prefix(NSubmenu screen)
     {
-        if (screen == null || _fullBleed.Contains(screen.GetType().Name))
+        if (screen == null)
             return;
 
         if (!screen.IsInsideTree())
@@ -51,6 +50,9 @@ internal static class MenuClampPatch
             Callable.From(() => { if (GodotObject.IsInstanceValid(screen)) Prefix(screen); }).CallDeferred();
             return;
         }
+
+        if (screen.GetType().Name == "NTimelineScreen" || HasArtwork(screen))
+            return;
 
         float inset = HudClampPatches.InsetFor(screen);
         if (inset <= 0f)
@@ -64,5 +66,15 @@ internal static class MenuClampPatch
             return;
 
         HudClampPatches.Narrow(screen, inset);
+    }
+
+    private static bool HasArtwork(Node screen)
+    {
+        foreach (Node child in screen.GetChildren())
+        {
+            if (child.Name == ArtworkContainer)
+                return true;
+        }
+        return false;
     }
 }
