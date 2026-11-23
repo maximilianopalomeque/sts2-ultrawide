@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -45,7 +46,11 @@ internal static class EventPortraitPatch
 
         if (layout.GetNodeOrNull<Control>("%Portrait") is not TextureRect portrait)
         {
-            Log.Warn("[Ultrawide] Event portrait not found; it will not fill the screen.");
+            // The Ancient and combat layouts share this script and have no portrait of
+            // their own -- their backgrounds are handled elsewhere -- so only the layout
+            // that is supposed to have one is worth reporting.
+            if (layout.SceneFilePath.EndsWith("default_event_layout.tscn", StringComparison.Ordinal))
+                Log.Warn("[Ultrawide] Event portrait not found; events will not fill the screen.");
             return;
         }
 

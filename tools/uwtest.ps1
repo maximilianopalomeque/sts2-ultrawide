@@ -50,22 +50,22 @@ function Send-Actions {
         $a = $t -split '\s+', 2
         switch ($a[0]) {
             'click' { $xy = $a[1] -split '\s+'
-                      [UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 250
+                      [void][UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 250
                       [UW]::mouse_event(0x0002,0,0,0,0); Start-Sleep -Milliseconds 60
                       [UW]::mouse_event(0x0004,0,0,0,0) }
             'key'   { [System.Windows.Forms.SendKeys]::SendWait($a[1]); Start-Sleep -Milliseconds 250 }
             'wheel' { [UW]::mouse_event(0x0800,0,0,[int]$a[1],0); Start-Sleep -Milliseconds 150 }
             'hwheel'{ [UW]::mouse_event(0x1000,0,0,[int]$a[1],0); Start-Sleep -Milliseconds 150 }
             'move'  { $xy = $a[1] -split '\s+'
-                      [UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 150 }
+                      [void][UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 150 }
             'drag'  { $xy = $a[1] -split '\s+'
-                      [UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 250
+                      [void][UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 250
                       [UW]::mouse_event(0x0002,0,0,0,0); Start-Sleep -Milliseconds 150
                       $steps = 20
                       for ($k = 1; $k -le $steps; $k++) {
                           $ix = [int]$xy[0] + ([int]$xy[2] - [int]$xy[0]) * $k / $steps
                           $iy = [int]$xy[1] + ([int]$xy[3] - [int]$xy[1]) * $k / $steps
-                          [UW]::SetCursorPos([int]$ix, [int]$iy); Start-Sleep -Milliseconds 25
+                          [void][UW]::SetCursorPos([int]$ix, [int]$iy); Start-Sleep -Milliseconds 25
                       }
                       Start-Sleep -Milliseconds 150
                       [UW]::mouse_event(0x0004,0,0,0,0) }
@@ -140,22 +140,26 @@ function Enter-Run {
 
       Un solo click en Continue no siempre prende, y si falla todo lo que sigue corre
       contra el menu principal: los comandos de consola no hacen nada y las capturas
-      muestran el menu. Se verifica preguntandole a la consola por una sala, que solo
-      responde dentro de una run.
+      muestran el menu.
+
+      El resultado de un comando de consola sale por la consola del juego y no por el
+      log, asi que no sirve para verificar. Lo que si queda escrito es el pase de
+      nitidez del mod, que se instala al cargar la run y en ningun otro momento.
     #>
     param([int]$Tries = 4)
 
     $log = "C:/Users/maxim/AppData/Roaming/SlayTheSpire2/logs/godot.log"
-    for ($i = 1; $i -le $Tries; $i++) {
-        Focus-Game | Out-Null
-        Send-Actions "click 2312 912; wait 1500; click 2312 912; wait 20000"
+    $marker = "Sharpening pass enabled"
 
-        $before = (Select-String -Path $log -Pattern "Jumped to room" -ErrorAction SilentlyContinue).Count
-        Invoke-Console -Command "room Map" -Wait 6000 | Out-Null
+    for ($i = 1; $i -le $Tries; $i++) {
+        $before = (Select-String -Path $log -Pattern $marker -ErrorAction SilentlyContinue).Count
+
+        Focus-Game | Out-Null
+        Send-Actions "click 2312 912; wait 1500; click 2312 912; wait 8000"
 
         # El log se vacia a disco con retraso: preguntar una sola vez da falsos negativos.
-        for ($t = 0; $t -lt 12; $t++) {
-            $after = (Select-String -Path $log -Pattern "Jumped to room" -ErrorAction SilentlyContinue).Count
+        for ($t = 0; $t -lt 24; $t++) {
+            $after = (Select-String -Path $log -Pattern $marker -ErrorAction SilentlyContinue).Count
             if ($after -gt $before) { return $true }
             Start-Sleep -Milliseconds 500
         }
