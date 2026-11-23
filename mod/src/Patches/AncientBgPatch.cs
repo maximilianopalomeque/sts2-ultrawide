@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Nodes.Events;
 using MegaCrit.Sts2.Core.Nodes.Screens;
 
 namespace Sts2Ultrawide.Patches;
@@ -44,11 +45,15 @@ internal static class AncientBgPatch
     private static float AnchorFor(Node container)
     {
         string? path = FindTexturePath(container, 0);
-        if (path != null)
+
+        foreach ((string key, float anchor) in _topHeavy)
         {
-            foreach ((string key, float anchor) in _topHeavy)
+            if (path != null && path.Contains(key, StringComparison.OrdinalIgnoreCase))
+                return anchor;
+
+            foreach (Node child in container.GetChildren())
             {
-                if (path.Contains(key, StringComparison.OrdinalIgnoreCase))
+                if (child.Name.ToString().Contains(key, StringComparison.OrdinalIgnoreCase))
                     return anchor;
             }
         }
@@ -105,9 +110,49 @@ internal static class AncientBgPatch
         float anchorY = size.Y * AnchorFor(__instance);
         float pivotY = anchorY - pos219.Value.Y;
 
+        // Never let the anchor pull the artwork off an edge. A Control scaled about a
+        // pivot has its top at pos.y + pivot.y * (1 - scale.y); solving that for the
+        // edges turns the anchor into a request rather than an instruction, so a value
+        // chosen to lift a face into frame cannot leave a black band behind it.
+        float posY = pos219.Value.Y;
+        float top = posY + pivotY * (1f - scale.Y);
+        if (top > 0f)
+            posY -= top;
+
+        float bottom = posY + pivotY + (size.Y - pivotY) * scale.Y;
+        if (bottom < size.Y)
+            posY += size.Y - bottom;
+
         __instance.PivotOffset = new Vector2(pivotX, pivotY);
         __instance.Scale = scale;
-        __instance.Position = new Vector2(posX, pos219.Value.Y);
+        __instance.Position = new Vector2(posX, posY);
         return false;
+    }
+}
+
+/// <summary>
+/// Re-runs the Ancient background layout once its artwork is actually there.
+///
+/// NAncientBgContainer lays itself out in _Ready, but the Ancient's background scene is
+/// instantiated into it later, while the event sets up its visuals. Anything that needs
+/// to know *which* Ancient is on screen -- such as the per-Ancient framing above -- is
+/// therefore looking at an empty container and quietly falls back to the default, which
+/// is why two attempts at that framing appeared to do nothing at all.
+/// </summary>
+[HarmonyPatch(typeof(NAncientEventLayout), "InitializeVisuals")]
+internal static class AncientBgRefreshPatch
+{
+    [HarmonyPostfix]
+    private static void Postfix(NAncientEventLayout __instance)
+    {
+        Callable.From(() =>
+        {
+            if (!GodotObject.IsInstanceValid(__instance) || !__instance.IsInsideTree())
+                return;
+            if (__instance.GetNodeOrNull<NAncientBgContainer>("%AncientBgContainer") is not { } container)
+                return;
+
+            AccessTools.Method(typeof(NAncientBgContainer), "OnWindowChange")?.Invoke(container, null);
+        }).CallDeferred();
     }
 }
