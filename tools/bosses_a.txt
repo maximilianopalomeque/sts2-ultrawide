@@ -1,0 +1,4 @@
+﻿boss_kaiser      | fight KAISER_CRAB_BOSS
+boss_queen       | fight QUEEN_BOSS
+boss_lagavulin   | fight LAGAVULIN_MATRIARCH_BOSS
+boss_thekin      | fight THE_KIN_BOSS

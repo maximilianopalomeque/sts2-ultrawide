@@ -1,0 +1,6 @@
+﻿boss_ceremonial  | fight CEREMONIAL_BEAST_BOSS
+boss_kaiser      | fight KAISER_CRAB_BOSS
+boss_knowledge   | fight KNOWLEDGE_DEMON_BOSS
+boss_lagavulin   | fight LAGAVULIN_MATRIARCH_BOSS
+boss_queen       | fight QUEEN_BOSS
+boss_soulfysh    | fight SOUL_FYSH_BOSS

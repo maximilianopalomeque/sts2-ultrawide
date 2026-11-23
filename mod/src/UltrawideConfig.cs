@@ -42,6 +42,21 @@ internal static class UltrawideConfig
     public static float BackgroundScaleMultiplier = 1.10f;
 
     /// <summary>
+    /// Whether each background layer is grown individually, on top of the single scale
+    /// applied to the container they share.
+    ///
+    /// Layers within one background are authored at different widths, so a shared scale
+    /// leaves the narrow ones short and the ground ends in a hard vertical line partway
+    /// across the screen. Growing them individually closes that.
+    ///
+    /// The trade is that a few bosses keep decorative body parts in those layers - the
+    /// Kaiser Crab's claws, for one - and growing the layer carries them further toward
+    /// the edges, away from health bars the game already draws detached from them. Turn
+    /// this off to keep that art exactly where vanilla puts it and accept the strip.
+    /// </summary>
+    public static bool LayerCoverage = true;
+
+    /// <summary>
     /// Strength of the sharpening pass over the room, 0 to turn it off.
     ///
     /// Enlarging the background means Godot resamples it bilinearly, which is what makes
@@ -82,18 +97,23 @@ internal static class UltrawideConfig
             AncientVerticalAnchor = Read(dict, "ancient_vertical_anchor", AncientVerticalAnchor, 0f, 1f);
             HudMaxRatio = Read(dict, "hud_max_ratio", HudMaxRatio, 0f, 8f);
             Sharpness = Read(dict, "sharpness", Sharpness, 0f, 1f);
+            LayerCoverage = ReadBool(dict, "layer_coverage", LayerCoverage);
 
             Log.Info("[Ultrawide] Config: vertical_anchor=" + BackgroundVerticalAnchor
                      + " scale_multiplier=" + BackgroundScaleMultiplier
                      + " ancient_anchor=" + AncientVerticalAnchor
                      + " hud_max_ratio=" + HudMaxRatio
-                     + " sharpness=" + Sharpness);
+                     + " sharpness=" + Sharpness
+                     + " layer_coverage=" + LayerCoverage);
         }
         catch (Exception e)
         {
             Log.Warn("[Ultrawide] Could not read " + Path + ", using defaults: " + e.Message);
         }
     }
+
+    private static bool ReadBool(Godot.Collections.Dictionary dict, string key, bool fallback)
+        => dict.ContainsKey(key) ? dict[key].AsBool() : fallback;
 
     private static float Read(Godot.Collections.Dictionary dict, string key, float fallback, float min, float max)
     {

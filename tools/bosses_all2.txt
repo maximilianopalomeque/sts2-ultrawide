@@ -1,0 +1,4 @@
+﻿boss_soulfysh    | fight SOUL_FYSH_BOSS
+boss_testsubject | fight TEST_SUBJECT_BOSS
+boss_insatiable  | fight THE_INSATIABLE_BOSS
+boss_thekin      | fight THE_KIN_BOSS

@@ -14,5 +14,8 @@
   "hud_max_ratio": 2.3888888,
 
   "_sharpness": "nitidez del pase CAS sobre la sala. 0 = apagado, 0.35 = por defecto, 1 = maximo",
-  "sharpness": 0.6
+  "sharpness": 0.6,
+
+  "_layer_coverage": "true = cada capa de fondo se agranda por separado hasta llegar a los bordes (cierra las franjas vacias en algunos jefes, pero corre hacia afuera arte decorativo como las pinzas del Kaiser Crab). false = solo escala el contenedor comun",
+  "layer_coverage": true
 }

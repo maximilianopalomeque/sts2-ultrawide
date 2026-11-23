@@ -131,4 +131,45 @@ internal static class Ultrawide
 
         node.Scale *= factor * UltrawideConfig.BackgroundScaleMultiplier;
     }
+
+    /// <summary>
+    /// Scales one node up until it spans the canvas, and no further.
+    ///
+    /// Layers within a single background are authored at different widths, so one scale
+    /// on their shared container keeps them proportionally different and the narrow ones
+    /// still stop short - which reads as the ground simply ending partway across the
+    /// screen. Measuring each layer where it actually lands and giving it only the factor
+    /// it is missing covers them all without over-zooming the ones that were already fine.
+    /// </summary>
+    public static void EnsureCoversCanvas(Control? node)
+    {
+        if (node == null || !node.IsInsideTree())
+            return;
+
+        Vector2 canvas = node.GetViewportRect().Size;
+        if (canvas.X <= 0 || canvas.Y <= 0)
+            return;
+
+        Transform2D world = node.GetGlobalTransform();
+        float width = node.Size.X * world.Scale.X;
+        if (width <= 1f)
+            return; // nothing laid out yet, or not a sized layer
+
+        float left = world.Origin.X;
+        float right = left + width;
+        float centre = canvas.X * 0.5f;
+
+        // How much each side is short of the edge, scaling about the centre of the canvas.
+        float needLeft = left > 0f ? (centre - 0f) / Math.Max(centre - left, 0.001f) : 1f;
+        float needRight = right < canvas.X ? (canvas.X - centre) / Math.Max(right - centre, 0.001f) : 1f;
+        float need = Math.Max(needLeft, needRight);
+        if (need <= 1.0001f)
+            return;
+
+        need = Math.Min(need * UltrawideConfig.BackgroundScaleMultiplier, AbsoluteMaxRatio);
+
+        var anchor = new Vector2(centre, canvas.Y * UltrawideConfig.BackgroundVerticalAnchor);
+        node.PivotOffset = (anchor - world.Origin) / Math.Max(world.Scale.X, 0.001f);
+        node.Scale *= need;
+    }
 }

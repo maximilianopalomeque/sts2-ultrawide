@@ -1,0 +1,4 @@
+﻿room_shop     | room Shop
+room_rest     | room RestSite
+room_treasure | room Treasure
+room_elite    | room Elite

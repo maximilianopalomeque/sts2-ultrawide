@@ -1,0 +1,3 @@
+﻿boss_vantom      | fight VANTOM_BOSS
+boss_waterfall   | fight WATERFALL_GIANT_BOSS
+boss_aeonglass   | fight AEONGLASS_BOSS
