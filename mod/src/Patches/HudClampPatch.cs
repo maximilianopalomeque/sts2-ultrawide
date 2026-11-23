@@ -28,8 +28,11 @@ internal static class HudClampPatches
     /// <summary>Pieces under the run HUD that must keep spanning the whole display.</summary>
     private static readonly string[] _fullWidth =
     {
-        "%OverlayBackstop",
-        "%CapstoneBackstop",
+        // The two backstops are not unique-named, so they have to be reached through
+        // their containers, which are. Addressing them as "%OverlayBackstop" silently
+        // resolves to nothing and leaves the screen dimmed only down the middle.
+        "%OverlayScreensContainer/OverlayBackstop",
+        "%CapstoneScreenContainer/CapstoneBackstop",
         "%MultiplayerTimeoutOverlay",
         "%AboveTopBarVfxContainer",
     };
@@ -80,19 +83,21 @@ internal static class HudClampPatches
     /// <summary>
     /// Pushes one child back out to the full canvas while its parent stays narrowed.
     /// </summary>
-    private static void SpanFullCanvas(Control? node, float inset)
+    internal static void SpanFullCanvas(Control? node)
     {
-        if (node == null || inset <= 0f || node.GetParent() is not Control parent)
+        if (node == null || !node.IsInsideTree() || node.GetParent() is not Control parent)
             return;
 
         float canvasWidth = node.GetViewportRect().Size.X;
         if (canvasWidth <= 0f)
             return;
 
-        // Offsets are measured from the anchor, which sits a fraction along the narrowed
-        // parent; that parent in turn starts one inset in from the left of the canvas.
-        node.OffsetLeft = -inset - node.AnchorLeft * parent.Size.X;
-        node.OffsetRight = canvasWidth - inset - node.AnchorRight * parent.Size.X;
+        // Solve for the offsets that put this node's global rect across the whole canvas.
+        // Derived from where the parent actually sits rather than from the inset, so it
+        // holds however deeply the node is nested inside the narrowed interface.
+        float parentX = parent.GlobalPosition.X;
+        node.OffsetLeft = -parentX - node.AnchorLeft * parent.Size.X;
+        node.OffsetRight = canvasWidth - parentX - node.AnchorRight * parent.Size.X;
     }
 
     /// <summary>The whole combat HUD: energy, hand, piles, end turn, ping.</summary>
@@ -114,7 +119,13 @@ internal static class HudClampPatches
         Narrow(__instance, inset);
 
         foreach (string path in _fullWidth)
-            SpanFullCanvas(__instance.GetNodeOrNull<Control>(path), inset);
+        {
+            Control? node = __instance.GetNodeOrNull<Control>(path);
+            if (node == null)
+                Log.Warn("[Ultrawide] '" + path + "' not found; it will stay narrowed.");
+            else
+                SpanFullCanvas(node);
+        }
 
         // The top bar reads as a bar across the screen rather than a floating strip, so
         // its backing plate spans the display even though the icons on it are pulled in.
@@ -122,6 +133,6 @@ internal static class HudClampPatches
         if (topBar == null)
             Log.Warn("[Ultrawide] Top bar not found; its backing plate stays narrowed.");
         else
-            SpanFullCanvas(topBar.GetNodeOrNull<Control>("%BgImage"), inset);
+            SpanFullCanvas(topBar.GetNodeOrNull<Control>("%BgImage"));
     }
 }
