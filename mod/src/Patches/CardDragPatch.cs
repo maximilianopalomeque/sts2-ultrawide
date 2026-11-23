@@ -23,10 +23,11 @@ namespace Sts2Ultrawide.Patches;
 /// frame, so the game and the correction end up as two alternating targets and the card
 /// settles halfway between them -- measurably so, at the exact midpoint.
 ///
-/// Only the calls from those three methods are touched. The hand's own layout passes
-/// positions that are already relative to the hand, and rebasing those would walk the
-/// whole hand off to the left; a flag set around the three callers keeps them apart,
-/// which is more robust than trying to recognise the values themselves.
+/// Two conditions have to hold before a value is touched, and both are needed. The
+/// flag narrows it to those three methods; the value check then picks out the one call
+/// each of them makes against the screen. Playing a card re-lays out the rest of the
+/// hand from inside TryPlayCard, in hand-relative coordinates, and rebasing those too
+/// sends the whole hand six hundred units off the left of the screen.
 /// </summary>
 internal static class CardDragPatch
 {
@@ -70,6 +71,23 @@ internal static class CardDragPatch
         if (__instance.GetParent() is not Control parent)
             return;
 
+        if (!MeasuredAgainstScreen(__instance, position))
+            return;
+
         position -= parent.GlobalPosition;
+    }
+
+    /// <summary>
+    /// Whether this is one of the two values those methods compute from the screen --
+    /// the mouse, or the middle of the canvas -- rather than a hand layout position
+    /// that happens to pass through while they run.
+    /// </summary>
+    private static bool MeasuredAgainstScreen(Node holder, Vector2 position)
+    {
+        Vector2 canvas = holder.GetViewport().GetVisibleRect().Size;
+        if (Mathf.Abs(position.X - canvas.X * 0.5f) < 1f)
+            return true;
+
+        return position.IsEqualApprox(holder.GetViewport().GetMousePosition());
     }
 }
