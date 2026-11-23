@@ -42,6 +42,15 @@ internal static class UltrawideConfig
     public static float BackgroundScaleMultiplier = 1.10f;
 
     /// <summary>
+    /// Strength of the sharpening pass over the room, 0 to turn it off.
+    ///
+    /// Enlarging the background means Godot resamples it bilinearly, which is what makes
+    /// a widened background look soft. A contrast adaptive pass puts much of that back.
+    /// It only runs on displays wide enough that the art is actually being enlarged.
+    /// </summary>
+    public static float Sharpness = 0.6f;
+
+    /// <summary>
     /// Widest aspect the HUD may spread across, as width/height, or 0 to let the HUD
     /// use the whole display. 2.389 is 21:9, the widest layout the game itself was
     /// designed for, which keeps the end-turn button and the energy orb within a glance
@@ -72,11 +81,13 @@ internal static class UltrawideConfig
             BackgroundScaleMultiplier = Read(dict, "background_scale_multiplier", BackgroundScaleMultiplier, 0.5f, 3f);
             AncientVerticalAnchor = Read(dict, "ancient_vertical_anchor", AncientVerticalAnchor, 0f, 1f);
             HudMaxRatio = Read(dict, "hud_max_ratio", HudMaxRatio, 0f, 8f);
+            Sharpness = Read(dict, "sharpness", Sharpness, 0f, 1f);
 
             Log.Info("[Ultrawide] Config: vertical_anchor=" + BackgroundVerticalAnchor
                      + " scale_multiplier=" + BackgroundScaleMultiplier
                      + " ancient_anchor=" + AncientVerticalAnchor
-                     + " hud_max_ratio=" + HudMaxRatio);
+                     + " hud_max_ratio=" + HudMaxRatio
+                     + " sharpness=" + Sharpness);
         }
         catch (Exception e)
         {

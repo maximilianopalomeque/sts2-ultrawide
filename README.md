@@ -12,6 +12,9 @@ lifts that cap and makes the artwork, the rooms and the HUD behave at any width.
   5120x1440 screen renders 5120 pixels wide with no black bars.
 - **Covers the screen with artwork.** Backgrounds in combat, shops, rest sites, event and
   Ancient scenes, and the main menu are scaled to fill the wider canvas.
+- **Sharpens what it enlarges.** A contrast adaptive pass over the room recovers much
+  of the definition bilinear upscaling costs — measured at +58% local detail — without
+  touching text, cards or icons.
 - **Keeps the HUD readable.** Health, energy, the hand, the piles and the end-turn button
   stay within a 21:9 band in the middle of the screen rather than scattering to the far
   corners — configurable, including off.
@@ -53,6 +56,7 @@ See [`mod/ultrawide.example.json`](mod/ultrawide.example.json).
 | `ancient_vertical_anchor` | `0.5` | Same for event and Ancient illustrations. These are single paintings with the subject in the middle, so they are centred rather than anchored low. |
 | `background_scale_multiplier` | `1.10` | Overscan. A few per cent of bleed so no room ends up a sliver short at one edge. |
 | `hud_max_ratio` | `2.3888888` | Widest aspect the HUD may spread across. `2.3888888` is 21:9. Set to `0` to let the HUD use the whole display. |
+| `sharpness` | `0.6` | Strength of the sharpening pass over the room. Enlarging the background means Godot resamples it bilinearly, which is what makes it look soft; a contrast adaptive pass puts much of that back. `0` turns it off. |
 
 ## Building
 
@@ -88,6 +92,7 @@ modified.
 | `AncientBgPatch` | Extrapolates the Ancient background layout past its hand-tuned 21:9 setup. |
 | `HudClampPatch` | Narrows the combat HUD, the top bar and the map controls to a comfortable width. |
 | `ViewportRatioPatch` | Re-bases the buttons that position themselves as a fraction of the viewport. |
+| `SharpenPatch` | Contrast adaptive sharpening over the room, to recover definition lost to enlarging the art. |
 | `SavePathPatch` | Keeps the vanilla save directory while only cosmetic mods are loaded. |
 
 Each patch is applied on its own and skipped if it no longer matches the build you are

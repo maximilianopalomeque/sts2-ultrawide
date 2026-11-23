@@ -11,5 +11,8 @@
   "background_scale_multiplier": 1.10,
 
   "_hud_max_ratio": "ancho maximo del HUD. 0 = usa toda la pantalla. 2.3888888 = contenido a 21:9 centrado",
-  "hud_max_ratio": 2.3888888
+  "hud_max_ratio": 2.3888888,
+
+  "_sharpness": "nitidez del pase CAS sobre la sala. 0 = apagado, 0.35 = por defecto, 1 = maximo",
+  "sharpness": 0.6
 }
