@@ -1,8 +1,14 @@
-# Slay the Spire 2 — Ultrawide Support
+# Slay the Spire 2 — Super Ultrawide 32:9 Support
 
-Native support for displays wider than 21:9. Slay the Spire 2 caps its canvas at 21:9 and
-pillarboxes anything wider, so a 32:9 monitor plays the game on half its screen. This mod
-lifts that cap and makes the artwork, the rooms and the HUD behave at any width.
+Slay the Spire 2 supports 21:9 natively and caps there, pillarboxing anything wider, so a
+32:9 monitor plays the game on half its screen. This mod lifts that cap and makes the
+artwork, the rooms and the HUD behave at 32:9, 48:9 and anything in between.
+
+**At 21:9 and below it does nothing.** Every patch measures the display first and steps
+aside inside the range the game already handles, so the native 21:9 experience is left
+exactly as Mega Crit shipped it. The one exception is deliberate: the Ancient backgrounds
+interpolate only up to 2.333:1 and then stop, which leaves them a little short at 21:9
+itself (2.389:1) -- that gap is filled.
 
 ![Combat at 5120x1440](docs/combat.png)
 
