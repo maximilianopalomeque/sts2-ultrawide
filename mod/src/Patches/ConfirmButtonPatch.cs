@@ -42,18 +42,37 @@ internal static class ConfirmButtonPatch
     [HarmonyPrefix]
     private static void BeforeHide(NConfirmButton __instance) => Apply(__instance, place: false);
 
+    /// <summary>
+    /// Once now and once at the end of the frame. The button recomputes itself on the
+    /// same resize signal that re-narrows the interface around it, and the order
+    /// between the two is not ours to pick -- measured going the wrong way in both
+    /// directions, so the button was always working from the previous ratio's parent
+    /// and parking itself somewhere visible. The deferred pass sees the parent where
+    /// it finally ended up.
+    /// </summary>
     [HarmonyPatch(typeof(NConfirmButton), "OnWindowChange")]
     [HarmonyPostfix]
-    private static void AfterWindowChange(NConfirmButton __instance) => Apply(__instance, place: true);
+    private static void AfterWindowChange(NConfirmButton __instance)
+    {
+        Apply(__instance, place: true);
+        Callable.From(() =>
+        {
+            if (GodotObject.IsInstanceValid(__instance))
+                Apply(__instance, place: true);
+        }).CallDeferred();
+    }
 
     private static void Apply(NConfirmButton button, bool place)
     {
         if (!GodotObject.IsInstanceValid(button) || !button.IsInsideTree())
             return;
 
+        // Not skipped when there is no inset to apply. The ratio can be changed while
+        // the game is running, and bailing out at the narrow ratios leaves whatever
+        // this method wrote at a wider one in place -- which is how a stray confirm
+        // tick ends up sitting in the middle of a fight. With an inset of zero the
+        // arithmetic below reproduces the game's own placement anyway.
         float inset = HudClampPatches.InsetFor(button);
-        if (inset <= 0f)
-            return;
 
         var showField = AccessTools.Field(typeof(NConfirmButton), "_showPos");
         var hideField = AccessTools.Field(typeof(NConfirmButton), "_hidePos");

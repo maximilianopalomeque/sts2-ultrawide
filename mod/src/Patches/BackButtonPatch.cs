@@ -45,9 +45,12 @@ internal static class BackButtonPatch
         if (!GodotObject.IsInstanceValid(button) || !button.IsInsideTree())
             return;
 
+        // Not skipped when there is no inset to apply. The ratio can be changed while
+        // the game is running, and bailing out at the narrow ratios leaves whatever
+        // this method wrote at a wider one in place -- which is how a stray confirm
+        // tick ends up sitting in the middle of a fight. With an inset of zero the
+        // arithmetic below reproduces the game's own placement anyway.
         float inset = HudClampPatches.InsetFor(button);
-        if (inset <= 0f)
-            return;
 
         var showField = AccessTools.Field(typeof(NBackButton), "_showPos");
         var hideField = AccessTools.Field(typeof(NBackButton), "_hidePos");

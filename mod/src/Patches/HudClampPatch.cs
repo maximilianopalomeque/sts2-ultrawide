@@ -81,6 +81,30 @@ internal static class HudClampPatches
     }
 
     /// <summary>
+    /// Re-runs a narrowing whenever the window or the aspect ratio setting changes.
+    ///
+    /// Without this the inset is whatever it was when the interface was built. Switch
+    /// the aspect ratio mid-run and the canvas shrinks while the interface keeps the
+    /// old inset -- at 16:9 that leaves a 1920-wide canvas with 630 taken off each
+    /// side, and the settings panel is clipped down to a third of its width. Offsets
+    /// are measured from the ones the scene authored, so re-running is safe.
+    /// </summary>
+    internal static void FollowWindow(Control node, Action reapply)
+    {
+        if (node.GetTree()?.Root is not { } root)
+            return;
+
+        var callable = Callable.From(() =>
+        {
+            if (GodotObject.IsInstanceValid(node) && node.IsInsideTree())
+                reapply();
+        });
+
+        if (!root.IsConnected(Viewport.SignalName.SizeChanged, callable))
+            root.Connect(Viewport.SignalName.SizeChanged, callable);
+    }
+
+    /// <summary>
     /// Pushes one child back out to the full canvas while its parent stays narrowed.
     /// </summary>
     internal static void SpanFullCanvas(Control? node)
@@ -103,7 +127,11 @@ internal static class HudClampPatches
     /// <summary>The whole combat HUD: energy, hand, piles, end turn, ping.</summary>
     [HarmonyPatch(typeof(NCombatUi), "_Ready")]
     [HarmonyPostfix]
-    private static void NCombatUi_Ready(NCombatUi __instance) => Narrow(__instance, InsetFor(__instance));
+    private static void NCombatUi_Ready(NCombatUi __instance)
+    {
+        Narrow(__instance, InsetFor(__instance));
+        FollowWindow(__instance, () => Narrow(__instance, InsetFor(__instance)));
+    }
 
     /// <summary>
     /// The run HUD, and with it every screen, overlay and popup that lives under it.
@@ -112,11 +140,16 @@ internal static class HudClampPatches
     [HarmonyPostfix]
     private static void NGlobalUi_Ready(NGlobalUi __instance)
     {
+        FollowWindow(__instance, () => ApplyToGlobalUi(__instance));
+        ApplyToGlobalUi(__instance);
+    }
+
+    private static void ApplyToGlobalUi(NGlobalUi __instance)
+    {
         float inset = InsetFor(__instance);
+        Narrow(__instance, inset);
         if (inset <= 0f)
             return;
-
-        Narrow(__instance, inset);
 
         foreach (string path in _fullWidth)
         {

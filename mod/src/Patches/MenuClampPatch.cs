@@ -51,12 +51,34 @@ internal static class MenuClampPatch
             return;
         }
 
+        // The inset depends on the aspect ratio, which the player can change while the
+        // screen is open. Applied once, a screen keeps the inset it was given: switch
+        // to 16:9 afterwards and the settings panel is still missing 630 pixels from
+        // each side of a canvas only 1920 wide, which clips it to a third of itself.
+        HudClampPatches.FollowWindow(screen, () => Narrow(screen));
+
+        Narrow(screen);
+    }
+
+    private static void Narrow(NSubmenu screen)
+    {
+        if (!GodotObject.IsInstanceValid(screen) || !screen.IsInsideTree())
+            return;
+
         if (screen.GetType().Name == "NTimelineScreen" || HasArtwork(screen))
             return;
 
         float inset = HudClampPatches.InsetFor(screen);
+
+        // Restored unconditionally when there is nothing to claw back, without
+        // consulting the parent. On a ratio change the parent is narrowed by its own
+        // handler and the order between the two is not ours to choose; skipping here
+        // because the parent still looks narrow would leave this screen clipped.
         if (inset <= 0f)
+        {
+            HudClampPatches.Narrow(screen, 0f);
             return;
+        }
 
         // A stack that is itself narrower than the canvas is already inside something
         // that was narrowed -- the pause menu lives under the run HUD -- and narrowing
