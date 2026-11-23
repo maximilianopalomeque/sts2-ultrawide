@@ -169,3 +169,24 @@ function Enter-Run {
     }
     return $false
 }
+
+function Start-Drag {
+    <# Aprieta el boton en (x1,y1) y arrastra hasta (x2,y2) SIN soltar. #>
+    param([int]$X1, [int]$Y1, [int]$X2, [int]$Y2)
+    [void][UW]::SetCursorPos($X1, $Y1); Start-Sleep -Milliseconds 300
+    [UW]::mouse_event(0x0002, 0, 0, 0, 0); Start-Sleep -Milliseconds 200
+    for ($k = 1; $k -le 25; $k++) {
+        $ix = $X1 + ($X2 - $X1) * $k / 25
+        $iy = $Y1 + ($Y2 - $Y1) * $k / 25
+        [void][UW]::SetCursorPos([int]$ix, [int]$iy); Start-Sleep -Milliseconds 25
+    }
+    Start-Sleep -Milliseconds 400
+}
+
+function Cancel-Drag {
+    <# Vuelve abajo y suelta, para no jugar la carta. #>
+    param([int]$X, [int]$Y)
+    for ($k = 1; $k -le 15; $k++) { [void][UW]::SetCursorPos($X, $Y); Start-Sleep -Milliseconds 20 }
+    Start-Sleep -Milliseconds 200
+    [UW]::mouse_event(0x0004, 0, 0, 0, 0); Start-Sleep -Milliseconds 400
+}
