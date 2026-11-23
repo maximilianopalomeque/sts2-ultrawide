@@ -1,0 +1,7 @@
+combat        | cmd: fight OVERGROWTH_CRAWLERS
+pile_draw     | keys: key a; wait 2200
+pile_discard  | keys: key {ESC}; wait 900; key s; wait 2200
+pile_exhaust  | keys: key {ESC}; wait 900; key d; wait 2200
+deck_view     | keys: key {ESC}; wait 900; key w; wait 2200
+card_reward   | cmd: win
+game_over     | cmd: die

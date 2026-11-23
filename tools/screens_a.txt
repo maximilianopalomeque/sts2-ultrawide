@@ -1,0 +1,14 @@
+# Ancients
+anc_DARV        | cmd: ancient DARV
+anc_NEOW        | cmd: ancient NEOW
+anc_NONUPEIPE   | cmd: ancient NONUPEIPE
+anc_OROBAS      | cmd: ancient OROBAS
+anc_PAEL        | cmd: ancient PAEL
+anc_TANX        | cmd: ancient TANX
+anc_TEZCATARA   | cmd: ancient TEZCATARA
+anc_VAKUU       | cmd: ancient VAKUU
+# Salas
+room_Treasure   | cmd: room Treasure
+room_Map        | cmd: room Map
+room_Shop       | cmd: room Shop
+room_RestSite   | cmd: room RestSite

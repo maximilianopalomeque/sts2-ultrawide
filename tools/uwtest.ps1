@@ -14,7 +14,7 @@ public class UW {
   [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint a,uint b,bool f);
   [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
   [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
-  [DllImport("user32.dll")] public static extern void mouse_event(uint f,uint dx,uint dy,uint d,int e);
+  [DllImport("user32.dll")] public static extern void mouse_event(uint f,uint dx,uint dy,int d,int e);
 }
 "@
 
@@ -54,6 +54,21 @@ function Send-Actions {
                       [UW]::mouse_event(0x0002,0,0,0,0); Start-Sleep -Milliseconds 60
                       [UW]::mouse_event(0x0004,0,0,0,0) }
             'key'   { [System.Windows.Forms.SendKeys]::SendWait($a[1]); Start-Sleep -Milliseconds 250 }
+            'wheel' { [UW]::mouse_event(0x0800,0,0,[int]$a[1],0); Start-Sleep -Milliseconds 150 }
+            'hwheel'{ [UW]::mouse_event(0x1000,0,0,[int]$a[1],0); Start-Sleep -Milliseconds 150 }
+            'move'  { $xy = $a[1] -split '\s+'
+                      [UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 150 }
+            'drag'  { $xy = $a[1] -split '\s+'
+                      [UW]::SetCursorPos([int]$xy[0], [int]$xy[1]); Start-Sleep -Milliseconds 250
+                      [UW]::mouse_event(0x0002,0,0,0,0); Start-Sleep -Milliseconds 150
+                      $steps = 20
+                      for ($k = 1; $k -le $steps; $k++) {
+                          $ix = [int]$xy[0] + ([int]$xy[2] - [int]$xy[0]) * $k / $steps
+                          $iy = [int]$xy[1] + ([int]$xy[3] - [int]$xy[1]) * $k / $steps
+                          [UW]::SetCursorPos([int]$ix, [int]$iy); Start-Sleep -Milliseconds 25
+                      }
+                      Start-Sleep -Milliseconds 150
+                      [UW]::mouse_event(0x0004,0,0,0,0) }
             'wait'  { Start-Sleep -Milliseconds ([int]$a[1]) }
         }
     }
