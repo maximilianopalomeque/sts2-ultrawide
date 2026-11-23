@@ -90,9 +90,14 @@ modified.
 | --- | --- |
 | `ContentScalePatch` | Builds the content scale at the display's real ratio instead of clamping to 2580x1080. |
 | `BackgroundPatch` | Scales room, shop, rest-site and menu backgrounds to cover the wider canvas. |
+| `LayerCoveragePatch` | Grows the individual layers within a background, which are authored at different widths. |
 | `AncientBgPatch` | Extrapolates the Ancient background layout past its hand-tuned 21:9 setup. |
+| `EventPortraitPatch` | Stretches an event's illustration across the canvas instead of centring it in a void. |
+| `EventVfxPatch` | Maps an event's sparkles and its shared dark vignette onto the stretched illustration. |
 | `HudClampPatch` | Narrows the combat HUD, the top bar and the map controls to a comfortable width. |
+| `BackButtonPatch`, `ConfirmButtonPatch` | Re-place the two buttons that measure from a screen edge, including where they hide. |
 | `ViewportRatioPatch` | Re-bases the buttons that position themselves as a fraction of the viewport. |
+| `ModalBackstopPatch`, `BackstopSweepPatch` | Keep every dimmed backdrop covering the display rather than the narrowed band. |
 | `SharpenPatch` | Contrast adaptive sharpening over the room, to recover definition lost to enlarging the art. |
 | `SavePathPatch` | Keeps the vanilla save directory while only cosmetic mods are loaded. |
 
@@ -101,10 +106,31 @@ running, so a change in one part of the game disables that patch rather than the
 
 ## Compatibility
 
-Developed against **v0.113.1**. Slay the Spire 2 is in Early Access and its internals move;
-if a future build changes one of the methods above, that patch logs a warning and switches
-itself off while the rest keeps working. Check the log at
-`%APPDATA%\SlayTheSpire2\logs\godot.log` for lines tagged `[Ultrawide]`.
+Developed against **v0.113.1** (beta branch) and declares a floor of `0.100.0`, so it also
+loads on the stable branch, which is a few builds behind. Slay the Spire 2 is in Early
+Access and its internals move; if a future build changes one of the methods above, that
+patch logs a warning and switches itself off while the rest keeps working. Check the log at
+`%APPDATA%\SlayTheSpire2\logs\godot.log` for lines tagged `[Ultrawide]` -- it reports how
+many patch groups applied and names any that were skipped.
+
+## What has been checked at 5120x1440
+
+Main menu and its submenus, Timeline, settings (from the menu and mid-run), the four
+compendium screens, character select, multiplayer submenu, the map, combat against normal,
+elite and all twelve boss encounters, all four acts, shop, rest site, treasure, the card
+reward and loot panels, the card pile views, every event illustration spot-checked across
+eight events, all eight Ancients, pause, card inspection, the death screen and the run
+summary. Also re-checked at 16:9 and 21:9, where the mod is inert.
+
+### Known limitations
+
+- **Character select** keeps its framed artwork over the blurred main menu rather than
+  filling the screen. The piece is a tightly composed portrait; growing it to the edges of
+  a 32:9 canvas means a roughly 1.5x zoom and loses a third of the character, which looks
+  worse than the frame does.
+- **A few bosses** keep decorative body parts in the background layers, so
+  `layer_coverage` carries them further out than vanilla puts them. Set it to `false` to
+  leave that art alone, at the cost of a sliver of uncovered canvas on those fights.
 
 ## Credits
 
