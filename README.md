@@ -63,6 +63,7 @@ See [`mod/ultrawide.example.json`](mod/ultrawide.example.json).
 | `background_scale_multiplier` | `1.10` | Overscan. A few per cent of bleed so no room ends up a sliver short at one edge. |
 | `hud_max_ratio` | `2.3888888` | Widest aspect the HUD may spread across. `2.3888888` is 21:9. Set to `0` to let the HUD use the whole display. |
 | `layer_coverage` | `true` | Grows each background layer individually so none stops short of the edge. A few bosses keep decorative body parts in those layers, and growing the layer carries them further out; set to `false` to leave that art where vanilla puts it. |
+| `character_art_zoom` | `0` | Character select is framed at 21:9 rather than stretched; see Known limitations. `1.0` fills the screen instead, at the cost of a third of the character. |
 | `sharpness` | `0.6` | Strength of the sharpening pass over the room. Enlarging the background means Godot resamples it bilinearly, which is what makes it look soft; a contrast adaptive pass puts much of that back. `0` turns it off. |
 
 ## Building
@@ -137,10 +138,20 @@ Re-checked at 16:9 and 21:9, where the mod is inert.
 
 ### Known limitations
 
-- **Character select** keeps its framed artwork over the blurred main menu rather than
-  filling the screen. The piece is a tightly composed portrait; growing it to the edges of
-  a 32:9 canvas means a roughly 1.5x zoom and loses a third of the character, which looks
-  worse than the frame does.
+- **Character select is presented at 21:9**, with the rest of the screen masked off.
+  Each character's artwork is one illustration drawn as a 21:9 sheet with an edge -- for
+  two of them a flat 2561x1201 image, cape and all -- so there is no transform that
+  reaches the sides of a 32:9 screen without either cropping or inventing artwork that
+  was never drawn. Enlarging one to fill the screen costs a third of its height, and the
+  character is what lives in that third. Leaving them alone is no better: the pieces run
+  from 2592 to 2937 units wide, so the border changes thickness with every character you
+  click. A fixed 21:9 window settles both -- nothing cropped, nothing stretched, and the
+  same frame every time, because the edge you see is no longer the artwork's. Set
+  `character_art_zoom` to `1.0` if you would rather have the crop.
+
+  The multiplayer lobby shows the same artwork and keeps the game's own layout: it builds
+  its scene inside a SubViewport, where the mask lands across the middle of the picture
+  instead of at its edges.
 - **A few bosses** keep decorative body parts in the background layers, so
   `layer_coverage` carries them further out than vanilla puts them. Set it to `false` to
   leave that art alone, at the cost of a sliver of uncovered canvas on those fights.
