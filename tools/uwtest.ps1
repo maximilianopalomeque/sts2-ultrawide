@@ -118,3 +118,35 @@ function Invoke-Console {
     }
     return $false
 }
+
+function Enter-Run {
+    <#
+      Entra a la partida guardada y CONFIRMA que cargo.
+
+      Un solo click en Continue no siempre prende, y si falla todo lo que sigue corre
+      contra el menu principal: los comandos de consola no hacen nada y las capturas
+      muestran el menu. Se verifica preguntandole a la consola por una sala, que solo
+      responde dentro de una run.
+    #>
+    param([int]$Tries = 4)
+
+    $log = "C:/Users/maxim/AppData/Roaming/SlayTheSpire2/logs/godot.log"
+    for ($i = 1; $i -le $Tries; $i++) {
+        Focus-Game | Out-Null
+        Send-Actions "click 2312 912; wait 1500; click 2312 912; wait 20000"
+
+        $before = (Select-String -Path $log -Pattern "Jumped to room" -ErrorAction SilentlyContinue).Count
+        Invoke-Console -Command "room Map" -Wait 6000 | Out-Null
+
+        # El log se vacia a disco con retraso: preguntar una sola vez da falsos negativos.
+        for ($t = 0; $t -lt 12; $t++) {
+            $after = (Select-String -Path $log -Pattern "Jumped to room" -ErrorAction SilentlyContinue).Count
+            if ($after -gt $before) { return $true }
+            Start-Sleep -Milliseconds 500
+        }
+
+        Write-Host ("    intento {0}: no entro a la run" -f $i) -ForegroundColor DarkYellow
+        Send-Actions "key {ESC}; wait 1500"
+    }
+    return $false
+}

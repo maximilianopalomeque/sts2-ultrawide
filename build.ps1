@@ -19,8 +19,19 @@ if (-not (Test-Path (Join-Path $Sts2Dir 'data_sts2_windows_x86_64\sts2.dll'))) {
     throw "No sts2.dll under '$Sts2Dir'. Pass the game folder with -Sts2Dir."
 }
 
+# dotnet is not always on PATH for non-interactive shells.
+$dotnet = (Get-Command dotnet -ErrorAction SilentlyContinue).Source
+if (-not $dotnet) {
+    foreach ($c in @("$env:ProgramFiles\dotnet\dotnet.exe",
+                     "$env:LOCALAPPDATA\Microsoft\dotnet\dotnet.exe",
+                     "${env:ProgramFiles(x86)}\dotnet\dotnet.exe")) {
+        if (Test-Path $c) { $dotnet = $c; break }
+    }
+}
+if (-not $dotnet) { throw "dotnet SDK not found. Install .NET 9 or add dotnet to PATH." }
+
 Write-Host "Building..." -ForegroundColor Cyan
-dotnet build (Join-Path $root 'mod\ultrawide.csproj') -c Release -p:Sts2Dir="$($Sts2Dir.Replace([char]92, [char]47))"
+& $dotnet build (Join-Path $root 'mod\ultrawide.csproj') -c Release -p:Sts2Dir="$($Sts2Dir.Replace([char]92, [char]47))"
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
 $staged = Join-Path $root 'release\content\ultrawide'

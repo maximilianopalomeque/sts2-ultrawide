@@ -141,7 +141,7 @@ internal static class Ultrawide
     /// screen. Measuring each layer where it actually lands and giving it only the factor
     /// it is missing covers them all without over-zooming the ones that were already fine.
     /// </summary>
-    public static void EnsureCoversCanvas(Control? node)
+    public static void EnsureCoversCanvas(Control? node, float? verticalAnchor = null)
     {
         if (node == null || !node.IsInsideTree())
             return;
@@ -168,7 +168,8 @@ internal static class Ultrawide
 
         need = Math.Min(need * UltrawideConfig.BackgroundScaleMultiplier, AbsoluteMaxRatio);
 
-        var anchor = new Vector2(centre, canvas.Y * UltrawideConfig.BackgroundVerticalAnchor);
+        float anchorY = verticalAnchor ?? UltrawideConfig.BackgroundVerticalAnchor;
+        var anchor = new Vector2(centre, canvas.Y * anchorY);
         node.PivotOffset = (anchor - world.Origin) / Math.Max(world.Scale.X, 0.001f);
         node.Scale *= need;
     }
