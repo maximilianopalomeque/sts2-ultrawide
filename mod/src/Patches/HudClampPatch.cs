@@ -70,7 +70,7 @@ internal static class HudClampPatches
     }
 
     /// <summary>Pulls a stretched container in from both sides.</summary>
-    private static void Narrow(Control? node, float inset)
+    internal static void Narrow(Control? node, float inset)
     {
         if (node == null)
             return;

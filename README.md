@@ -97,6 +97,7 @@ modified.
 | `HudClampPatch` | Narrows the combat HUD, the top bar and the map controls to a comfortable width. |
 | `BackButtonPatch`, `ConfirmButtonPatch` | Re-place the two buttons that measure from a screen edge, including where they hide. |
 | `ViewportRatioPatch` | Re-bases the buttons that position themselves as a fraction of the viewport. |
+| `MenuClampPatch` | Narrows the menu screens that put one column against each edge of the canvas. |
 | `ModalBackstopPatch`, `BackstopSweepPatch` | Keep every dimmed backdrop covering the display rather than the narrowed band. |
 | `SharpenPatch` | Contrast adaptive sharpening over the room, to recover definition lost to enlarging the art. |
 | `SavePathPatch` | Keeps the vanilla save directory while only cosmetic mods are loaded. |
@@ -115,12 +116,18 @@ many patch groups applied and names any that were skipped.
 
 ## What has been checked at 5120x1440
 
-Main menu and its submenus, Timeline, settings (from the menu and mid-run), the four
-compendium screens, character select, multiplayer submenu, the map, combat against normal,
-elite and all twelve boss encounters, all four acts, shop, rest site, treasure, the card
-reward and loot panels, the card pile views, every event illustration spot-checked across
-eight events, all eight Ancients, pause, card inspection, the death screen and the run
-summary. Also re-checked at 16:9 and 21:9, where the mod is inert.
+**Menus** -- main menu, Timeline and the epoch reveal, singleplayer and multiplayer
+submenus, character select, daily challenge, blitz, custom mode, profile select,
+settings (all four tabs, from the menu and mid-run), card library, relic collection,
+potion lab, bestiary, character stats, run history.
+
+**In a run** -- map in every act, combat against normal, elite and all twelve bosses,
+all four acts, shop room and the merchant's wares, rest site and the forge, treasure
+room and its relic, card reward and loot, draw pile and deck views, card inspection,
+eight events spot-checked, all eight Ancients, pause, the death and victory screens and
+both run summaries.
+
+Re-checked at 16:9 and 21:9, where the mod is inert.
 
 ### Known limitations
 

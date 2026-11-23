@@ -1,0 +1,9 @@
+f_combat     | cmd: fight OVERGROWTH_CRAWLERS
+f_elite      | cmd: fight LAGAVULIN_MATRIARCH_BOSS
+f_kin        | cmd: fight KIN_BOSS
+f_queen      | cmd: fight QUEEN_BOSS
+r_shop       | cmd: room Shop
+r_rest       | cmd: room RestSite
+e_tea        | cmd: event TEA_MASTER
+e_symbiote   | cmd: event SYMBIOTE
+a_neow       | cmd: ancient NEOW

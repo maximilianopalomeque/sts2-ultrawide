@@ -1,0 +1,7 @@
+act2_monster | cmd: act 2
+act2_room    | cmd: room Monster
+act3_jump    | cmd: act 3
+act3_room    | cmd: room Monster
+act4_jump    | cmd: act 4
+act4_room    | cmd: room Monster
+act4_map     | cmd: room Map
