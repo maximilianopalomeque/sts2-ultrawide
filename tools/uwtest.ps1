@@ -14,6 +14,10 @@ public class UW {
   [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint a,uint b,bool f);
   [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
   [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
+  [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr h,int x,int y,int w,int ht,bool repaint);
+  [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+  [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
   [DllImport("user32.dll")] public static extern void mouse_event(uint f,uint dx,uint dy,int d,int e);
 }
 "@
@@ -189,4 +193,52 @@ function Cancel-Drag {
     for ($k = 1; $k -le 15; $k++) { [void][UW]::SetCursorPos($X, $Y); Start-Sleep -Milliseconds 20 }
     Start-Sleep -Milliseconds 200
     [UW]::mouse_event(0x0004, 0, 0, 0, 0); Start-Sleep -Milliseconds 400
+}
+
+function Resize-Game {
+    <# Redimensiona la ventana del juego de verdad, como si arrastraras el borde. #>
+    param([int]$Width, [int]$Height, [int]$X = 40, [int]$Y = 40)
+    $h = Get-GameWindow
+    if ($h -eq [IntPtr]::Zero) { return $false }
+    [void][UW]::MoveWindow($h, $X, $Y, $Width, $Height, $true)
+    Start-Sleep -Milliseconds 1800
+    return $true
+}
+
+function Get-GameRect {
+    $h = Get-GameWindow
+    $r = New-Object UW+RECT
+    [void][UW]::GetWindowRect($h, [ref]$r)
+    return @{ X = $r.Left; Y = $r.Top; W = ($r.Right - $r.Left); H = ($r.Bottom - $r.Top) }
+}
+
+function Capture-Window {
+    <# Captura solo la ventana del juego, para poder medir en sus propias coordenadas. #>
+    param([string]$Out, [int]$Shrink = 2)
+    if (-not (Focus-Game)) { return $false }
+    Start-Sleep -Milliseconds 500
+    $g = Get-GameRect
+    if ($g.W -le 0 -or $g.H -le 0) { return $false }
+    $bmp = New-Object System.Drawing.Bitmap($g.W, $g.H)
+    $gfx = [System.Drawing.Graphics]::FromImage($bmp)
+    $gfx.CopyFromScreen($g.X, $g.Y, 0, 0, $bmp.Size); $gfx.Dispose()
+    if ($Shrink -gt 1) {
+        $w = [int]($g.W / $Shrink); $hh = [int]($g.H / $Shrink)
+        $s = New-Object System.Drawing.Bitmap($w, $hh)
+        $g2 = [System.Drawing.Graphics]::FromImage($s)
+        $g2.InterpolationMode = 'HighQualityBicubic'
+        $g2.DrawImage($bmp, 0, 0, $w, $hh); $g2.Dispose(); $bmp.Dispose(); $bmp = $s
+    }
+    $bmp.Save($Out, [System.Drawing.Imaging.ImageFormat]::Png); $bmp.Dispose()
+    return $true
+}
+
+function Click-Frac {
+    <# Clic en coordenadas relativas a la ventana (0..1), para que funcione a cualquier tamano. #>
+    param([double]$Fx, [double]$Fy, [int]$WaitMs = 2000)
+    $g = Get-GameRect
+    $x = [int]($g.X + $g.W * $Fx)
+    $y = [int]($g.Y + $g.H * $Fy)
+    Focus-Game | Out-Null
+    Send-Actions ("click {0} {1}; wait {2}" -f $x, $y, $WaitMs)
 }
