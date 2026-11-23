@@ -66,6 +66,16 @@ internal static class UltrawideConfig
     public static float Sharpness = 0.6f;
 
     /// <summary>
+    /// How far to grow the character artwork on character select, the multiplayer lobby
+    /// and Dread. These are single pieces drawn for 21:9, so reaching the edges of a
+    /// 32:9 screen costs a third of their height -- and that third comes off the
+    /// character. 0 keeps the artist's framing and leaves a border; 1 fills the screen
+    /// and crops; anything between still leaves a border, because coverage is all or
+    /// nothing.
+    /// </summary>
+    public static float CharacterArtZoom;
+
+    /// <summary>
     /// Widest aspect the HUD may spread across, as width/height, or 0 to let the HUD
     /// use the whole display. 2.389 is 21:9, the widest layout the game itself was
     /// designed for, which keeps the end-turn button and the energy orb within a glance
@@ -97,6 +107,7 @@ internal static class UltrawideConfig
             AncientVerticalAnchor = Read(dict, "ancient_vertical_anchor", AncientVerticalAnchor, 0f, 1f);
             HudMaxRatio = Read(dict, "hud_max_ratio", HudMaxRatio, 0f, 8f);
             Sharpness = Read(dict, "sharpness", Sharpness, 0f, 1f);
+            CharacterArtZoom = Read(dict, "character_art_zoom", CharacterArtZoom, 0f, 1f);
             LayerCoverage = ReadBool(dict, "layer_coverage", LayerCoverage);
 
             Log.Info("[Ultrawide] Config: vertical_anchor=" + BackgroundVerticalAnchor
@@ -104,6 +115,7 @@ internal static class UltrawideConfig
                      + " ancient_anchor=" + AncientVerticalAnchor
                      + " hud_max_ratio=" + HudMaxRatio
                      + " sharpness=" + Sharpness
+                     + " character_art_zoom=" + CharacterArtZoom
                      + " layer_coverage=" + LayerCoverage);
         }
         catch (Exception e)

@@ -59,8 +59,15 @@ internal static class CharacterArtPatch
         if (ratio <= VanillaRatioMax)
             return false; // within the range the game sizes correctly
 
+        // Off by default. Reaching the edges means a third of the height goes, and
+        // these pieces put the character in that third -- so whether a border or a
+        // crop is the lesser evil is the player's call, not ours.
+        if (UltrawideConfig.CharacterArtZoom <= 0f)
+            return false;
+
+        float covered = VanillaScale * ratio / VanillaRatioMax;
         __instance.PivotOffset = new Vector2(__instance.Size.X * 0.5f, 0f);
-        __instance.Scale = Vector2.One * (VanillaScale * ratio / VanillaRatioMax);
+        __instance.Scale = Vector2.One * Mathf.Lerp(VanillaScale, covered, UltrawideConfig.CharacterArtZoom);
         return true;
     }
 }
