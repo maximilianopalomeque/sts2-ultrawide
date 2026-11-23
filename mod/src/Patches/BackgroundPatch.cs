@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -42,6 +43,9 @@ internal static class BackgroundPatches
     /// <summary>Where the logo sits as a fraction of the canvas, before anything moved it.</summary>
     private const string LogoPlaceMeta = "uw_logo_place";
 
+    /// <summary>The logo's on-screen scale before the background was ever grown.</summary>
+    private const string LogoSizeMeta = "uw_logo_size";
+
     /// <summary>
     /// The menu's logo is parented under the background container, so scaling the
     /// background would drag the title with it.
@@ -58,19 +62,33 @@ internal static class BackgroundPatches
         var logo = AccessTools.Field(typeof(NMainMenuBg), "_logo")?.GetValue(instance) as Node2D;
 
         Vector2 canvas = instance.GetViewportRect().Size;
-        if (logo != null && canvas.X > 0f && canvas.Y > 0f && !logo.HasMeta(LogoPlaceMeta))
-            logo.SetMeta(LogoPlaceMeta, logo.GlobalPosition / canvas);
+        if (logo == null || canvas.X <= 0f || canvas.Y <= 0f)
+        {
+            GrowField(instance, "_bg");
+            return;
+        }
 
-        Vector2? scale = logo?.Scale;
+        if (!logo.HasMeta(LogoPlaceMeta))
+        {
+            logo.SetMeta(LogoPlaceMeta, logo.GlobalPosition / canvas);
+            logo.SetMeta(LogoSizeMeta, logo.GetGlobalTransform().Scale);
+        }
 
         GrowField(instance, "_bg");
 
-        if (logo == null || !logo.HasMeta(LogoPlaceMeta) || canvas.X <= 0f || canvas.Y <= 0f)
-            return;
+        // Both halves have to be undone. The logo's own Scale property never changes --
+        // what grows is the scale it inherits from the container above it -- so putting
+        // its position back while leaving that alone is how it ends up correctly placed
+        // and half again too large.
+        Vector2 wanted = logo.GetMeta(LogoSizeMeta).AsVector2();
+        if (logo.GetParent() is CanvasItem parent)
+        {
+            Vector2 inherited = parent.GetGlobalTransform().Scale;
+            logo.Scale = new Vector2(wanted.X / Math.Max(inherited.X, 0.001f),
+                                     wanted.Y / Math.Max(inherited.Y, 0.001f));
+        }
 
         logo.GlobalPosition = logo.GetMeta(LogoPlaceMeta).AsVector2() * canvas;
-        if (scale.HasValue)
-            logo.Scale = scale.Value;
     }
 
     [HarmonyPatch(typeof(NMainMenuBg), "ScaleBgIfNarrow")]
